@@ -13,15 +13,15 @@ import matplotlib.pyplot as plt
 
 """### Downloading extra dependencies from NLTK"""
 
-nltk.download('punkt')
-nltk.download('stopwords')
+# nltk.download('punkt')
+# nltk.download('stopwords')
 
 
 """### Getting stopwords customized to your problem statement"""
 
 #Use this function to create custom list of stop_words for your Project
 
-path = r'' #Add the path to stopwords_not_to_be_used.txt file
+path = r'C:\Users\Aniket\Desktop\Experiments\NLP\Document-Clustering-TFIDF\Git Clustering\Stopwords\stopwords_not_to_be_used.txt' #Add the path to stopwords_not_to_be_used.txt file
 def get_stopwords(path):
   stopwords = nltk.corpus.stopwords.words('english')
   not_words = []
@@ -38,9 +38,9 @@ stop_words,customized_stopwords = get_stopwords(path)
 
 """### Loading the Data"""
 
-path = r'' #Add the path to Articles folder
+path = r'C:\Users\Aniket\Desktop\Experiments\NLP\Document-Clustering-TFIDF\Git Clustering\Articles' #Add the path to Articles folder
 seed = 137 #Seed value
-def load_data(path,seed): 
+def load_data(path,seed):
   train_texts = []
   for fname in sorted(os.listdir(path)):
     if fname.endswith('.txt'):
@@ -82,7 +82,7 @@ def generate_vocab(train_texts):
   for text in train_texts:
     allwords_tokenized = tokenize(text)
     total_words.append(allwords_tokenized)
-    vocab_tokenized.extend(allwords_tokenized)    
+    vocab_tokenized.extend(allwords_tokenized)
     allwords_stemmed = tokenize_stem(text)
     vocab_stemmed.extend(allwords_stemmed)
   return vocab_tokenized,vocab_stemmed,total_words
@@ -92,10 +92,10 @@ vocab_tokenized,vocab_stemmed,total_words = generate_vocab(train_texts)
 """### Calculating Tf-idf matrix"""
 
 '''
-Attributes in TfidVectorizer are data dependent. 
+Attributes in TfidVectorizer are data dependent.
 Use 'stop_words = customized_stopwords' if you want to use your own set of stopwords else leave it as it is.
 Functions available for tokenizer -> 1)tokenize  2) tokenize_stem  3) Remove the attribute to use default function
-''' 
+'''
 
 def tfid_vector(train_texts):
   tfidf_vectorizer = TfidfVectorizer(max_df = 0.85, min_df = 0.1, sublinear_tf = True, stop_words = 'english', use_idf = True, tokenizer = tokenize, ngram_range = (1,10))
@@ -118,16 +118,21 @@ plt.show()
 
 
 #Uncomment the below code after getting appropriate k value from the graph
-'''
-K_value =      #Write the optimum K-value after seeing the Elbow Graph
+
+K_value = int(input("Enter Optimum K Value = "))      #Write the optimum K-value after seeing the Elbow Graph
 km = KMeans(n_clusters = K_value, n_init = 2000, max_iter = 6000, precompute_distances = 'auto' )
 clusters = km.fit_predict(tfidf_matrix)
 clusters = list(clusters)
 print(clusters)
 
-'''
+if 'Results' not in os.listdir(os.getcwd()):
+    os.mkdir('Results')
 
-
-
-
-
+F_count = 0
+for c,t in zip(clusters, train_texts):
+    if 'cluster_{}'.format(c) not in os.listdir('Results'):
+        os.mkdir('Results/cluster_{}'.format(c))
+    f = open('Results/cluster_{}/{}.txt'.format(c,F_count),'w')
+    f.write(t)
+    f.close()
+    F_count += 1
